@@ -2,7 +2,7 @@
 #define SRC_BINDINGS_H
 
 #include "node_usb.h"
-#include "libusb-1.0/libusb.h"
+//#include "libusb-1.0/libusb.h"
 
 // Taken from node-libmysqlclient
 #define OBJUNWRAP ObjectWrap::Unwrap
@@ -10,7 +10,7 @@
 #define V8SYM(str) String::NewSymbol(str)
 
 #ifdef ENABLE_DEBUG
-  #define DEBUG_HEADER fprintf(stderr, "node-usb [%s:%s() %d]: ", __FILE__, __FUNCTION__, __LINE__); 
+  #define DEBUG_HEADER fprintf(stderr, "node-usb [%s:%s() %d]: ", __FILE__, __FUNCTION__, __LINE__);
   #define DEBUG_FOOTER fprintf(stderr, "\n");
   #define DEBUG(STRING) DEBUG_HEADER fprintf(stderr, "%s", STRING); DEBUG_FOOTER
   #define DEBUG_OPT(...) DEBUG_HEADER fprintf(stderr, __VA_ARGS__); DEBUG_FOOTER
@@ -36,7 +36,7 @@
 #define LOCAL(TYPE, VARNAME, REF) \
 		HandleScope scope;\
 		TYPE *VARNAME = OBJUNWRAP<TYPE>(REF);
-		
+
 #define EIO_CUSTOM(FUNC, STRUCTURE, CALLBACK) \
 		uv_work_t* req = new uv_work_t();\
 		req->data = STRUCTURE;\
@@ -87,14 +87,14 @@
 	EIO_AFTER(transfer_req, SELF)\
 	free(transfer_req);
 
-		
+
 #define INT_ARG(VAR, ARG) \
 	if (!(ARG)->IsInt32()) { \
 		THROW_BAD_ARGS("Expected int as " #VAR " parameter") \
 	} else { \
 		VAR = ((ARG)->Int32Value()); \
-	} 
-	
+	}
+
 #define BUF_LEN_ARG(ARG) \
 	libusb_endpoint_direction modus; \
 	if (Buffer::HasInstance(ARG)) { \
@@ -120,11 +120,11 @@ namespace NodeUsb  {
 	class Endpoint;
 	class Transfer;
 	class Stream;
-	
+
 	const PropertyAttribute CONST_PROP = static_cast<v8::PropertyAttribute>(ReadOnly|DontDelete);
-	
+
 	void doTransferCallback(Handle<Function> v8callback, Handle<Object> v8this, libusb_transfer_status status, uint8_t* buffer, unsigned length);
-	
+
 	Local<v8::Value> makeBuffer(const uint8_t* buf, unsigned length);
 
 	class AllowConstructor {
@@ -153,7 +153,7 @@ namespace NodeUsb  {
 		int interface_number;
 		int interface_alternate_setting;
 		int endpoint_number;
-	};	
+	};
 
 	struct request {
 		Persistent<Function> callback;
@@ -170,7 +170,7 @@ namespace NodeUsb  {
 
 	static inline Local<Value> errno_exception(int errorno) {
 		const char* err = "";
-		
+
 		// taken from pyusb
 		switch (errorno) {
 			case LIBUSB_ERROR_IO:
@@ -213,7 +213,7 @@ namespace NodeUsb  {
 				err = "Unknown error";
 				break;
 		}
-		
+
 		Local<Value> e  = Exception::Error(String::NewSymbol(err));
 		Local<Object> obj = e->ToObject();
 		obj->Set(NODE_PSYMBOL("errno"), Integer::New(errorno));

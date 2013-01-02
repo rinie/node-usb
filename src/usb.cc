@@ -1,20 +1,21 @@
 #include "usb.h"
 #include "device.h"
-#include <thread>
+//#include <thread>
 
 namespace NodeUsb {
 	libusb_context* usb_context;
-	std::thread usb_thread;
+//	std::thread usb_thread;
+	uv_thread_t usb_thread;
 	std::vector< Persistent<Object> > Usb::deviceList;
-	
-	void USBThreadFn(){
+
+	void USBThreadFn(void *arg){
 		while(1) libusb_handle_events(usb_context);
 	}
 
 	void Usb::Initalize(Handle<Object> target) {
 		DEBUG("Entering")
 		HandleScope  scope;
-		
+
 		libusb_init(&usb_context);
 
 		// Constants must be passed to ObjectTemplate and *not* to FunctionTemplate
@@ -74,10 +75,14 @@ namespace NodeUsb {
 
 		// Bindings to nodejs
 		NODE_SET_METHOD(target, "setDebugLevel", Usb::SetDebugLevel);
-		
+#if 0
 		usb_thread = std::thread(USBThreadFn);
 		usb_thread.detach();
-		
+#else
+		//usb_thread = std::thread(USBThreadFn);
+		uv_thread_create(&usb_thread, USBThreadFn, NULL);
+		//usb_thread.detach();
+#endif
 		Local<ObjectTemplate> devlist_tpl = ObjectTemplate::New();
 		devlist_tpl->SetAccessor(V8STR("length"), DeviceListLength);
 		devlist_tpl->SetIndexedPropertyHandler(DeviceListGet);
@@ -95,18 +100,18 @@ namespace NodeUsb {
 
 		// need libusb_device structure as first argument
 		if (args.Length() != 1 || !args[0]->IsUint32() || args[0]->Uint32Value() >= 4) {
-			THROW_BAD_ARGS("Usb::SetDebugLevel argument is invalid. [uint:[0-3]]!") 
+			THROW_BAD_ARGS("Usb::SetDebugLevel argument is invalid. [uint:[0-3]]!")
 		}
-		
+
 		libusb_set_debug(usb_context, args[0]->Uint32Value());
 
 		return Undefined();
 	}
-	
+
 	void Usb::LoadDevices() {
 		HandleScope scope;
 		AllowConstructor allow;
-		
+
 		libusb_device **devices;
 		int num_devices = libusb_get_device_list(usb_context, &devices);
 
@@ -121,19 +126,19 @@ namespace NodeUsb {
 
 			deviceList.push_back(Persistent<Object>::New(js_device));
 		}
-		
+
 		libusb_free_device_list(devices, false);
 	}
-	
+
 	Handle<Value> Usb::DeviceListLength(Local<String> property, const AccessorInfo &info){
 		return Number::New(deviceList.size());
 	}
-	
+
 	Handle<Value> Usb::DeviceListGet(unsigned i, const AccessorInfo &info){
 		if (i < deviceList.size()){
 			return deviceList[i];
 		}else{
 			return Undefined();
-		}		
+		}
 	}
 }

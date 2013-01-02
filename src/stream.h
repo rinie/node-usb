@@ -6,16 +6,16 @@
 #include "device.h"
 #include "uv_async_queue.h"
 #include <vector>
-#include <atomic>
+//#include <atomic>
 
 namespace NodeUsb {
-	
+
 	class Stream{
 		public:
-		
+
 		Stream(Handle<Object> endpoint, Handle<Function> cb, Handle<Function> scb);
 		~Stream();
-		
+
 		struct CompletionData{
 			Stream* stream;
 			uint8_t* data;
@@ -23,16 +23,20 @@ namespace NodeUsb {
 			libusb_transfer_status status;
 			bool dead;
 		};
-		
+
 		static UVQueue<CompletionData> completionQueue;
-		
+
 		void start(unsigned nTransfers, unsigned transferSize);
 		void stop();
-		
+
 		enum StreamStatus {STREAM_IDLE, STREAM_ACTIVE, STREAM_CANCELLING, STREAM_ABORTED};
+#if 0
 		std::atomic_uchar state;
+#else
+		unsigned char state;
+#endif
 		unsigned activeTransfers;
-		
+
 		protected:
 		std::vector <libusb_transfer*> transfers;
 		Persistent<Object> v8endpoint;
@@ -41,9 +45,9 @@ namespace NodeUsb {
 		Device* device;
 		unsigned endpoint;
 		libusb_transfer_type type;
-		
+
 		void afterStop();
-		
+
 		static void handleCompletion(CompletionData completion);
 	};
 }

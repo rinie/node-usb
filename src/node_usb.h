@@ -1,8 +1,16 @@
 #ifndef SRC_NODE_USB_H
 #define SRC_NODE_USB_H
+#include <v8.h>
+
+#include <node.h>
+#include <node_version.h>
+#include <node_buffer.h>
+#include <uv.h>
+//#include <uv-private/ev.h>
+
 
 #include <stdlib.h>
-#include <unistd.h>
+//#include <unistd.h>
 #include <string.h>
 #include <stdio.h>
 #include <errno.h>
@@ -12,14 +20,8 @@
 #include <string>
 #include <cstdlib>
 
-#include <libusb-1.0/libusb.h>
-#include <v8.h>
-
-#include <node.h>
-#include <node_version.h>
-#include <node_buffer.h>
-#include <uv.h>
-//#include <uv-private/ev.h>
+//#include <libusb-1.0/libusb.h>
+#include <libusb.h>
 
 #define NODE_USB_VERSION "0.1"
 

@@ -12,25 +12,13 @@
         './src/transfer.cc',
         './src/stream.cc',  
       ],
-      'cflags': [
-        '-O3',
-        '-Wall',
-        '-Werror',
-        '-msse2',
-      ],
-      'cflags_cc': [
-        '-O3',
-        '-Wall',
-        '-Werror',
-        '-msse2',
-        '-std=gnu++0x'
-      ],      
       'defines': [
-        '_FILE_OFFSET_BITS=64',
         '_LARGEFILE_SOURCE',
+        '_FILE_OFFSET_BITS=64',
       ],
       'include_dirs+': [
-        'src/'
+        'src/',
+        'libusb-1.0/include/'
       ],
       'link_settings': {
         'conditions' : [
@@ -47,7 +35,19 @@
                       '-lusb-1.0'
                     ]
                 }
-            ]
+            ],
+        [ 'OS=="win"', {
+		'libraries' : [ 
+			'-l/temp/node-usb/libusb-1.0/lib/Win32/Release/libusb-1.0.lib' 
+		],
+          'msvs_settings': {
+            'VCLinkerTool': {
+              'AdditionalDependencies': [
+                'setupapi.lib'
+              ]
+            }
+          }
+        }]
         ]
       }  
     }
